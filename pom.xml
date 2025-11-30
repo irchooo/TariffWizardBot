@@ -30,6 +30,6 @@
         <module>tariff-service-module</module>
         <module>client-service-module</module>
         <module>applications-service-module</module>
-<!--        <module>notification-service-module</module>-->
+        <module>notification-service-module</module>
     </modules>
 </project>

@@ -1,0 +1,36 @@
+server:
+  port: 8083
+spring:
+  main:
+    banner-mode: off
+#  autoconfigure:
+#      exclude:
+#        - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+#        - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+#        - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+#        - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
+  application:
+    name: &applicationName notification-service
+
+  # В этом модуле мы НЕ подключаем datasource и liquibase,
+  # так как он хранит состояние в оперативной памяти (Map).
+  # Если Spring ругается при запуске, можно добавить:
+  # autoconfigure:
+  #   exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+# Конфигурация твоего класса BotProperties
+app:
+  bot:
+    # Критически важные данные берем ТОЛЬКО из переменных окружения
+    token: ${BOT_TOKEN}
+    username: ${BOT_USERNAME}
+
+# Адреса других модулей
+services:
+  client:
+    url: http://localhost:8081/api/v1/clients
+  tariff:
+    url: http://localhost:8080/api/v1
+  application:
+    url: http://localhost:8082/api/v1/applications
+
