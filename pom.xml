@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>ru.spbkt</groupId>
+    <artifactId>tariff-wizard-bot</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>tariff-wizard-bot</name>
+    <description>Multi-module Spring Boot app for telecom tariff calculation with Telegram bot interface and custom tariff constructor functionality</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <mapstruct.defaultComponentModel>spring</mapstruct.defaultComponentModel>
+        <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
+    </properties>
+
+    <modules>
+        <module>tariff-service-module</module>
+        <module>client-service-module</module>
+        <module>applications-service-module</module>
+<!--        <module>notification-service-module</module>-->
+    </modules>
+</project>

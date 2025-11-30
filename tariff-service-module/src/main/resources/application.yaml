@@ -1,0 +1,29 @@
+server:
+  port: 8080
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: &applicationName tariff-service
+
+  # Подключение к БД (через переменные окружения)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${DB_NAME:tariff_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}
+
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+  # Миграции (Liquibase)
+  liquibase:
+    # Убедись, что путь к файлу внутри resources совпадает с этим
+    change-log: 'classpath:db-migrations/tariff-changelog.xml'
+    enabled: true
+
+# Настройки модуля (если есть специфичные)
+tariff:
+  default-currency: RUB

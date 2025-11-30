@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="tariff-service-module" id="create-table-service-parameters">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="service_parameters"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="service_parameters">
+
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="unit" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="max_price_per_unit" type="numeric(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="text"/>
+
+            <column name="is_active" type="boolean" defaultValueBoolean="true"/>
+
+            <column name="created_at" type="timestamp" defaultValueDate="current_timestamp"/>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="tariff-service-module" id="create-table-tariffs">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariffs"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tariffs">
+
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="text"/>
+
+            <column name="is_active" type="boolean" defaultValueBoolean="true"/>
+
+            <column name="created_at" type="timestamp" defaultValueDate="current_timestamp"/>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="tariff-service-module" id="create-table-tariff-details">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tariff_details"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tariff_details">
+
+            <column name="tariff_id" type="bigint">
+                <constraints nullable="false" primaryKey="true"
+                             foreignKeyName="fk_tariff_details_tariff"
+                             references="tariffs(id)" deleteCascade="true"/>
+            </column>
+
+            <column name="parameter_id" type="bigint">
+                <constraints nullable="false" primaryKey="true"
+                             foreignKeyName="fk_tariff_details_parameter"
+                             references="service_parameters(id)"/>
+            </column>
+
+            <column name="volume" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="price_coefficient" type="numeric(4, 2)" defaultValueNumeric="1.0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="text"/>
+
+            <column name="is_active" type="boolean" defaultValueBoolean="true"/>
+
+            <column name="created_at" type="timestamp" defaultValueDate="current_timestamp"/>
+
+        </createTable>
+
+    </changeSet>
+
+</databaseChangeLog>

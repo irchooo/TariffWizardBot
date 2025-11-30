@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="client-service-module" id="fill-client-statuses">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM client_statuses</sqlCheck>
+        </preConditions>
+
+        <insert tableName="client_statuses">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="АКТИВНЫЙ"/>
+            <column name="description" value="Клиент, успешно пользующийся услугами, регулярно оплачивает тариф (стандартный рабочий статус)"/>
+        </insert>
+
+        <insert tableName="client_statuses">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="НОВЫЙ"/>
+            <column name="description" value="Клиент зарегистрировался (например, через бота), но еще не подключил ни один тариф"/>
+        </insert>
+
+        <insert tableName="client_statuses">
+            <column name="id" valueNumeric="3"/>
+            <column name="name" value="ПРИОСТАНОВЛЕН"/>
+            <column name="description" value="Клиент временно заблокирован по собственному желанию или из-за длительной неуплаты (услуги не предоставляются, но аккаунт сохранен)"/>
+        </insert>
+
+        <insert tableName="client_statuses">
+            <column name="id" valueNumeric="4"/>
+            <column name="name" value="ПРОБЛЕМНЫЙ"/>
+            <column name="description" value="Клиент с большими задолженностями"/>
+        </insert>
+
+        <insert tableName="client_statuses">
+            <column name="id" valueNumeric="5"/>
+            <column name="name" value="В АРХИВЕ"/>
+            <column name="description" value="Клиент расторг договор и больше не пользуется услугами компании (для хранения исторической информации)"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

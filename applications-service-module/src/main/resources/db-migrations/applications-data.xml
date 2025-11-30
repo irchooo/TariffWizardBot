@@ -1,0 +1,46 @@
+<databaseChangeLog
+
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="application-service-module" id="fill-app-statuses">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM application_statuses</sqlCheck>
+        </preConditions>
+
+        <insert tableName="application_statuses">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="СОЗДАНА"/>
+            <column name="description" value="Заявка зарегистрирована в системе"/>
+        </insert>
+
+        <insert tableName="application_statuses">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="В_ОБРАБОТКЕ"/>
+            <column name="description" value="Оператор или система проверяет заявку"/>
+        </insert>
+
+        <insert tableName="application_statuses">
+            <column name="id" valueNumeric="3"/>
+            <column name="name" value="ВЫПОЛНЕНА"/>
+            <column name="description" value="Тариф успешно подключен"/>
+        </insert>
+
+        <insert tableName="application_statuses">
+            <column name="id" valueNumeric="4"/>
+            <column name="name" value="ОТМЕНЕНА"/>
+            <column name="description" value="Клиент отменил заявку до выполнения"/>
+        </insert>
+
+        <insert tableName="application_statuses">
+            <column name="id" valueNumeric="5"/>
+            <column name="name" value="ОТКЛОНЕНА"/>
+            <column name="description" value="Система отклонила заявку (нет средств, ошибка)"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

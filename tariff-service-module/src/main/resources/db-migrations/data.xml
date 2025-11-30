@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="tariff-service-module" id="fill-service-parameters">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                <![CDATA[ select count(*) from service_parameters ]]>
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="service_parameters">
+            <column name="name">Интернет</column>
+            <column name="unit">Гб</column>
+            <column name="max_price_per_unit" valueNumeric="5.00"/>
+            <column name="description">Высокоскоростной мобильный интернет</column>
+        </insert>
+
+        <insert tableName="service_parameters">
+            <column name="name">Минуты</column>
+            <column name="unit">мин</column>
+            <column name="max_price_per_unit" valueNumeric="3.00"/>
+            <column name="description">Звонки на любые номера РФ</column>
+        </insert>
+
+        <insert tableName="service_parameters">
+            <column name="name">SMS</column>
+            <column name="unit">шт</column>
+            <column name="max_price_per_unit" valueNumeric="1.00"/>
+            <column name="description">SMS сообщения по всему миру</column>
+        </insert>
+    </changeSet>
+
+    <changeSet author="tariff-service-module" id="fill-tariffs">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                <![CDATA[ select count(*) from tariffs ]]>
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="tariffs">
+            <column name="name">Стандарт</column>
+            <column name="description">Оптимальный выбор</column>
+        </insert>
+
+        <insert tableName="tariffs">
+            <column name="name">Премиум</column>
+            <column name="description">Все включено</column>
+        </insert>
+    </changeSet>
+
+    <changeSet author="tariff-service-module" id="fill-tariff-details">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                <![CDATA[ select count(*) from tariff_details ]]>
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="tariff_details">
+            <column name="tariff_id" valueNumeric="1"/>
+            <column name="parameter_id" valueNumeric="1"/> <column name="volume" valueNumeric="10"/>
+            <column name="price_coefficient" valueNumeric="0.8"/>
+        </insert>
+
+        <insert tableName="tariff_details">
+            <column name="tariff_id" valueNumeric="1"/>
+            <column name="parameter_id" valueNumeric="2"/> <column name="volume" valueNumeric="200"/>
+            <column name="price_coefficient" valueNumeric="0.8"/>
+        </insert>
+
+        <insert tableName="tariff_details">
+            <column name="tariff_id" valueNumeric="1"/>
+            <column name="parameter_id" valueNumeric="3"/> <column name="volume" valueNumeric="50"/>
+            <column name="price_coefficient" valueNumeric="1.0"/>
+        </insert>
+
+        <insert tableName="tariff_details">
+            <column name="tariff_id" valueNumeric="2"/>
+            <column name="parameter_id" valueNumeric="1"/>
+            <column name="volume" valueNumeric="50"/>
+            <column name="price_coefficient" valueNumeric="0.5"/>
+        </insert>
+
+        <insert tableName="tariff_details">
+            <column name="tariff_id" valueNumeric="2"/>
+            <column name="parameter_id" valueNumeric="2"/>
+            <column name="volume" valueNumeric="1000"/>
+            <column name="price_coefficient" valueNumeric="0.5"/>
+        </insert>
+
+        <insert tableName="tariff_details">
+            <column name="tariff_id" valueNumeric="2"/>
+            <column name="parameter_id" valueNumeric="3"/>
+            <column name="volume" valueNumeric="200"/>
+            <column name="price_coefficient" valueNumeric="0.5"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

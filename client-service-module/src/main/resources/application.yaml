@@ -1,0 +1,25 @@
+server:
+  port: 8081
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: &applicationName client-service
+
+  # Тот же блок БД (так как база одна на всех в монолите)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${DB_NAME:tariff_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}
+
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+  # Миграции (Liquibase)
+  liquibase:
+    # Убедись, что путь к файлу внутри resources совпадает с этим
+    change-log: 'classpath:db-migrations/client-changelog.xml'
+    enabled: true

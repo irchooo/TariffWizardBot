@@ -1,0 +1,190 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="application-service-module" id="create-table-application-statuses">
+
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="application_statuses"/></not>
+        </preConditions>
+
+        <createTable tableName="application_statuses">
+
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamp" defaultValueDate="current_timestamp"/>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="application-service-module" id="create-table-applications">
+
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="applications"/></not>
+        </preConditions>
+
+        <createTable tableName="applications">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="client_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status_id" type="INT">
+                <constraints nullable="false" foreignKeyName="fk_applications_status"
+                             references="application_statuses(id)"/>
+            </column>
+
+            <column name="type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP"/>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="application-service-module" id="create-table-tariff-applications">
+
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="tariff_applications"/></not>
+        </preConditions>
+
+        <createTable tableName="tariff_applications">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false" unique="true"
+                             foreignKeyName="fk_tariff_app_application"
+                             references="applications(id)" deleteCascade="true"/>
+            </column>
+
+            <column name="tariff_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="application-service-module" id="сreate-table-custom-applications">
+
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="custom_applications"/></not>
+        </preConditions>
+
+        <createTable tableName="custom_applications">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false" unique="true"
+                             foreignKeyName="fk_custom_app_application"
+                             references="applications(id)" deleteCascade="true"/>
+            </column>
+
+            <column name="total_cost" type="NUMERIC(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="application-service-module" id="сreate-table-application-details">
+
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="application_details"/></not>
+        </preConditions>
+
+        <createTable tableName="application_details">
+
+            <column name="custom_application_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_app_details_custom_app"
+                             references="custom_applications(id)" deleteCascade="true"/>
+            </column>
+
+            <column name="parameter_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="volume" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="cost" type="NUMERIC(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="application-service-module" id="сreate-table-application-status-history">
+
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="application_status_history"/></not>
+        </preConditions>
+
+        <createTable tableName="application_status_history">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_history_application"
+                             references="applications(id)" deleteCascade="true"/>
+            </column>
+
+            <column name="old_status_id" type="INT">
+                <constraints foreignKeyName="fk_history_old_status"
+                             references="application_statuses(id)"/>
+            </column>
+
+            <column name="new_status_id" type="INT">
+                <constraints nullable="false" foreignKeyName="fk_history_new_status"
+                             references="application_statuses(id)"/>
+            </column>
+
+            <column name="reason" type="TEXT"/>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+</databaseChangeLog>
