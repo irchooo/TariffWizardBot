@@ -1,29 +1,33 @@
 package ru.spbkt.bot.model;
 
+/**
+ * Перечисление, представляющее текущее состояние пользователя в диалоге с ботом.
+ */
 public enum BotState {
     START,                  // Начальное состояние /start
+    WAITING_NAME,           // Ожидание имени для регистрации
+    WAITING_PHONE,          // Ожидание телефона для регистрации
     MAIN_MENU,              // Главное меню
 
-    // Сценарий 1: Регистрация
-    WAITING_NAME,           // Ожидание имени
-    WAITING_LAST_NAME,      // Ожидание фамилии
-    WAITING_PHONE,          // Ожидание телефона
+    // Конструктор тарифа (Сценарий 2)
+    CONSTRUCTOR_GB,         // Выбор объема интернет-трафика (Гб)
+    CONSTRUCTOR_MINUTES,    // Выбор объема минут
+    CONSTRUCTOR_SMS,        // Выбор объема СМС
+    CONSTRUCTOR_PREVIEW,    // Предпросмотр цены и подтверждение (перед отправкой заявки)
 
-    // Сценарий 2: Конструктор
-    CONSTRUCTOR_START,      // Начало конструктора
-    CONSTRUCTOR_GB,         // Ожидание ГБ
-    CONSTRUCTOR_MINUTES,    // Ожидание минут
-    CONSTRUCTOR_SMS,        // Ожидание СМС
-    CONSTRUCTOR_REVIEW,     // Просмотр и подтверждение
+    // Каталог тарифов (Сценарий 3)
+    CATALOG_VIEW,           // Просмотр списка готовых тарифов
+    CATALOG_SELECTED,       // Выбран конкретный готовый тариф (перед отправкой заявки)
 
-    // Сценарий 3: Каталог тарифов
-    CATALOG_VIEW,           // Просмотр каталога
-    CATALOG_SELECT_FIXED,   // Выбор конкретного тарифа
+    // Профиль (Сценарий 5)
+    PROFILE_VIEW,           // Просмотр профиля
+    PROFILE_EDIT_NAME,      // Изменение имени
+    PROFILE_EDIT_LAST_NAME, // Изменение фамилии
 
-    // Сценарий 6: Заявки
-    APPLICATIONS_LIST,      // Список заявок
-    APPLICATION_CANCELLATION_REASON, // Ожидание причины отмены
+    // Заявки (Сценарий 6)
+    APPLICATIONS_LIST,      // Просмотр списка заявок
+    APPLICATION_CANCEL_REASON, // Ожидание причины отмены
 
-    // Общее состояние
-    AWAITING_INPUT_DEFAULT; // Дефолтное состояние, ожидание текста/команды
+    // Поддержка (Сценарий 7)
+    SUPPORT_VIEW            // Просмотр контактов
 }

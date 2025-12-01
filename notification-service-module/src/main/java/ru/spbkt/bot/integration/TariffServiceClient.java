@@ -1,11 +1,5 @@
 package ru.spbkt.bot.integration;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import ru.spbkt.tariff.dto.request.CustomTariffRequest;
 import ru.spbkt.tariff.dto.response.ServiceParameterResponse;
 import ru.spbkt.tariff.dto.response.TariffCalculationResponse;
@@ -13,47 +7,34 @@ import ru.spbkt.tariff.dto.response.TariffResponse;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class TariffServiceClient {
-
-    private final RestTemplate restTemplate;
-
-    @Value("${services.tariff.url}")
-    private String tariffBaseUrl; // http://localhost:8080/api/v1
+/**
+ * Клиент для взаимодействия с модулем тарифов и расчета цен.
+ */
+public interface TariffServiceClient {
 
     /**
-     * Получить список готовых тарифов.
+     * Возвращает список активных параметров для конструктора (Гб, Мин, СМС)
+     * @return Список параметров.
      */
-    public List<TariffResponse> getAllTariffs() {
-        String url = tariffBaseUrl + "/tariffs";
-        // Используем exchange для получения List<T>
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<TariffResponse>>() {}
-        ).getBody();
-    }
+    List<ServiceParameterResponse> getServiceParameters();
 
     /**
-     * Получить параметры для конструктора (ГБ, Минуты).
+     * Рассчитывает стоимость кастомного тарифа (предпросмотр).
+     * @param request Объемы выбранных параметров (Гб, Мин, СМС).
+     * @return Детализация расчета и итоговая стоимость[cite: 1160].
      */
-    public List<ServiceParameterResponse> getConstructorParameters() {
-        String url = tariffBaseUrl + "/tariffs/parameters";
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<ServiceParameterResponse>>() {}
-        ).getBody();
-    }
+    TariffCalculationResponse calculateCustom(CustomTariffRequest request);
 
     /**
-     * Рассчитать стоимость кастомного тарифа (предпросмотр).
+     * Возвращает список активных готовых тарифов.
+     * @return Список тарифов.
      */
-    public TariffCalculationResponse calculateCustomPrice(CustomTariffRequest request) {
-        String url = tariffBaseUrl + "/calculation/custom";
-        return restTemplate.postForObject(url, request, TariffCalculationResponse.class);
-    }
+    List<TariffResponse> getTariffCatalog();
+
+    /**
+     * Рассчитывает стоимость готового тарифа по ID (чек).
+     * @param tariffId ID готового тарифа.
+     * @return Детализация расчета и итоговая стоимость[cite: 1158].
+     */
+    TariffCalculationResponse calculateFixed(Integer tariffId);
 }

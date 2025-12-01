@@ -3,18 +3,17 @@ package ru.spbkt.bot.model;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * Временная модель для хранения выбранных параметров при создании кастомного тарифа.
+ * Аналогично CustomTariffRequest, но для хранения состояния.
+ */
 @Data
 public class TariffDraft implements Serializable {
-    private final Map<Integer, Integer> parameters = new HashMap<>(); // ID параметра -> Volume
-    private String clientFirstName;
-    private String clientLastName;
-    private String clientPhoneNumber;
-    private Integer fixedTariffId;
-
-    public void setParameter(Integer parameterId, Integer volume) {
-        parameters.put(parameterId, volume);
-    }
+    /** Количество Гб (0, 10, 20, ...) */
+    private Integer internetGb;
+    /** Количество минут (0, 200, 500, ...) */
+    private Integer minutes;
+    /** Количество СМС (0, 50, 100, ...) */
+    private Integer sms;
 }

@@ -1,43 +1,47 @@
 package ru.spbkt.bot.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.bots.AbsSender;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.spbkt.bot.listener.TelegramBotListener;
 import ru.spbkt.bot.service.ResponseSender;
 
 @Slf4j
 @Service
 public class ResponseSenderImpl implements ResponseSender {
 
-    // Ссылка на сам объект бота (будет установлена из Listener)
-    private AbsSender telegramBot;
+    private final TelegramBotListener bot;
 
-    public void setTelegramBot(AbsSender telegramBot) {
-        this.telegramBot = telegramBot;
-    }
-
-    @Override
-    public void sendMessage(SendMessage message) {
-        if (telegramBot == null) {
-            log.error("TelegramBot is not initialized.");
-            return;
-        }
-        try {
-            telegramBot.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Error sending message to chatId={}: {}", message.getChatId(), e.getMessage());
-        }
+    // Внедряем бота лениво, чтобы разорвать цикл Handler -> Sender -> Bot -> Dispatcher -> Handler
+    public ResponseSenderImpl(@Lazy TelegramBotListener bot) {
+        this.bot = bot;
     }
 
     @Override
     public void sendMessage(Long chatId, String text) {
-        SendMessage message = SendMessage.builder()
-                .chatId(chatId.toString())
-                .text(text)
-                .parseMode("HTML")
-                .build();
-        sendMessage(message);
+        sendMessage(chatId, text, null);
+    }
+
+    @Override
+    public void sendMessage(Long chatId, String text, Object replyMarkup) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        if (replyMarkup instanceof ReplyKeyboard) {
+            message.setReplyMarkup((ReplyKeyboard) replyMarkup);
+        }
+        execute(message);
+    }
+
+    @Override
+    public void execute(SendMessage message) {
+        try {
+            bot.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка отправки сообщения пользователю {}: {}", message.getChatId(), e.getMessage());
+        }
     }
 }

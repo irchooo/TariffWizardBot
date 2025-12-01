@@ -1,49 +1,37 @@
 package ru.spbkt.bot.integration;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-import ru.spbkt.client.dto.request.ClientRegistrationRequest;
 import ru.spbkt.client.dto.response.ClientResponse;
 
-import java.util.Optional;
-
-@Slf4j
-@Service
-@RequiredArgsConstructor
-public class ClientServiceClient {
-
-    private final RestTemplate restTemplate;
-
-    @Value("${services.client.url}")
-    private String clientUrl; // http://localhost:8081/api/v1/clients
+/**
+ * Клиент для взаимодействия с модулем управления клиентами.
+ */
+public interface ClientServiceClient {
+    /**
+     * Проверяет, зарегистрирован ли клиент.
+     * @param telegramId ID Телеграм пользователя.
+     * @return true, если клиент существует.
+     */
+    boolean clientExists(Long telegramId);
 
     /**
-     * Поиск клиента по Telegram ID.
-     * Возвращает Optional.empty(), если клиент не найден (404).
+     * Регистрирует нового клиента.
+     * @param request Запрос на регистрацию (имя, фамилия, телефон и т.д.).
+     * @return Ответ с данными созданного клиента.
      */
-    public Optional<ClientResponse> getClientByTelegramId(Long telegramId) {
-        try {
-            ClientResponse response = restTemplate.getForObject(clientUrl + "/" + telegramId, ClientResponse.class);
-            return Optional.ofNullable(response);
-        } catch (HttpClientErrorException ex) {
-            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return Optional.empty();
-            }
-            log.error("Error getting client profile: {}", ex.getMessage());
-            throw ex;
-        }
-    }
+    ClientResponse registerClient(Object request); // Object - это ClientRegistrationRequest
 
     /**
-     * Регистрация клиента.
+     * Получает профиль клиента.
+     * @param telegramId ID Телеграм пользователя.
+     * @return Ответ с данными профиля клиента.
      */
-    public ClientResponse registerClient(ClientRegistrationRequest request) {
-        String url = clientUrl + "/register";
-        return restTemplate.postForObject(url, request, ClientResponse.class);
-    }
+    ClientResponse getClientProfile(Long telegramId);
+
+    /**
+     * Обновляет профиль клиента (имя/фамилия).
+     * @param telegramId ID Телеграм пользователя.
+     * @param request Запрос на обновление.
+     * @return Обновленный профиль клиента.
+     */
+    ClientResponse updateClientProfile(Long telegramId, Object request); // Object - это ClientProfileUpdateRequest
 }

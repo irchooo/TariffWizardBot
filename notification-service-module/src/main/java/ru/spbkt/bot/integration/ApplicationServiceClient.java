@@ -1,51 +1,40 @@
 package ru.spbkt.bot.integration;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import ru.spbkt.applications.dto.request.ApplicationCancelRequest;
-import ru.spbkt.applications.dto.request.CustomTariffApplicationRequest;
-import ru.spbkt.applications.dto.request.FixedTariffApplicationRequest;
 import ru.spbkt.applications.dto.response.ApplicationResponse;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class ApplicationServiceClient {
+/**
+ * Клиент для взаимодействия с модулем управления заявками.
+ */
+public interface ApplicationServiceClient {
 
-    private final RestTemplate restTemplate;
+    /**
+     * Создание заявки на готовый тариф.
+     * @param request Запрос на готовый тариф (FixedTariffApplicationRequest).
+     * @return Созданная заявка.
+     */
+    ApplicationResponse createFixedApplication(Object request); // Object - это FixedTariffApplicationRequest
 
-    @Value("${services.application.url}")
-    private String applicationUrl; // http://localhost:8082/api/v1/applications
+    /**
+     * Создание заявки на кастомный тариф.
+     * @param request Запрос на кастомный тариф (CustomTariffApplicationRequest).
+     * @return Созданная заявка.
+     */
+    ApplicationResponse createCustomApplication(Object request); // Object - это CustomTariffApplicationRequest
 
-    public ApplicationResponse createFixedApplication(FixedTariffApplicationRequest request) {
-        String url = applicationUrl + "/fixed";
-        return restTemplate.postForObject(url, request, ApplicationResponse.class);
-    }
+    /**
+     * Получение списка заявок пользователя.
+     * @param telegramId ID Телеграм пользователя.
+     * @return Список заявок.
+     */
+    List<ApplicationResponse> getMyApplications(Long telegramId);
 
-    public ApplicationResponse createCustomApplication(CustomTariffApplicationRequest request) {
-        String url = applicationUrl + "/custom";
-        return restTemplate.postForObject(url, request, ApplicationResponse.class);
-    }
-
-    public List<ApplicationResponse> getMyApplications(Long telegramId) {
-        String url = applicationUrl + "/my?telegramId=" + telegramId;
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<ApplicationResponse>>() {}
-        ).getBody();
-    }
-
-    public void cancelApplication(Long applicationId, String reason) {
-        String url = applicationUrl + "/" + applicationId + "/cancel";
-        ApplicationCancelRequest request = new ApplicationCancelRequest();
-        request.setReason(reason);
-        restTemplate.postForObject(url, request, ApplicationResponse.class);
-    }
+    /**
+     * Отмена заявки.
+     * @param id ID заявки.
+     * @param request Причина отмены (ApplicationCancelRequest).
+     * @return Обновленная заявка.
+     */
+    ApplicationResponse cancelApplication(Long id, Object request); // Object - это ApplicationCancelRequest
 }

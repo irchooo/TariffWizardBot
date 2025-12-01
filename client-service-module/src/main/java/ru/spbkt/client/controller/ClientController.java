@@ -34,6 +34,13 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/exists/{telegramId}")
+    public ResponseEntity<Boolean> clientExistsByTelegramId(@PathVariable Long telegramId) {
+        // Предполагается, что ClientService имеет метод, который просто проверяет наличие клиента
+        boolean exists = clientService.clientExistsByTelegramId(telegramId);
+        return ResponseEntity.ok(exists);
+    }
+
     /**
      * [Сценарий 5.1] Получение профиля клиента.
      * Используется ботом для отображения данных пользователю.

@@ -2,96 +2,103 @@ package ru.spbkt.bot.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.spbkt.bot.integration.ClientServiceClient;
 import ru.spbkt.bot.model.BotState;
 import ru.spbkt.bot.model.UserContext;
 import ru.spbkt.bot.service.ResponseSender;
+import ru.spbkt.bot.service.UserContextService;
 import ru.spbkt.bot.util.KeyboardFactory;
 import ru.spbkt.client.dto.request.ClientRegistrationRequest;
-
-import java.util.List;
+import ru.spbkt.client.dto.response.ClientResponse;
 
 @Component
 @RequiredArgsConstructor
 public class RegistrationHandler implements InputHandler {
 
-    private final ClientServiceClient clientService;
+    private final ClientServiceClient clientServiceClient;
     private final ResponseSender responseSender;
+    private final UserContextService userContextService;
 
+    // Этот хендлер будет вызываться явно из Dispatcher для состояний регистрации,
+    // поэтому getHandlerName можно вернуть любое из них или null, если маппинг ручной.
+    // Но для порядка вернем WAITING_NAME.
     @Override
-    public List<BotState> getSupportedStates() {
-        return List.of(BotState.START, BotState.WAITING_NAME, BotState.WAITING_LAST_NAME, BotState.WAITING_PHONE);
+    public BotState getHandlerName() {
+        return BotState.WAITING_NAME;
     }
 
     @Override
     public void handle(Update update, UserContext context) {
-        if (update.hasMessage() && update.getMessage().hasText() && update.getMessage().getText().equals("/start")) {
-            checkRegistration(update, context);
+        if (context.getState() == BotState.WAITING_NAME) {
+            handleNameInput(update, context);
+        } else if (context.getState() == BotState.WAITING_PHONE) {
+            handlePhoneInput(update, context);
+        }
+    }
+
+    private void handleNameInput(Update update, UserContext context) {
+        if (!update.hasMessage() || !update.getMessage().hasText()) {
+            responseSender.sendMessage(context.getChatId(), "Пожалуйста, введите ваше Имя и Фамилию текстом.");
             return;
         }
 
-        if (context.getCurrentState() == BotState.WAITING_NAME) {
-            context.getDraft().setClientFirstName(update.getMessage().getText());
-            context.setCurrentState(BotState.WAITING_LAST_NAME);
-            responseSender.sendMessage(context.getChatId(), "Введите вашу фамилию:");
-        } else if (context.getCurrentState() == BotState.WAITING_LAST_NAME) {
-            context.getDraft().setClientLastName(update.getMessage().getText());
-            context.setCurrentState(BotState.WAITING_PHONE);
+        String fullName = update.getMessage().getText();
+        // Временное хранение имени можно сделать через TariffDraft или добавить поле в Context.
+        // Для простоты разделим строку и временно сохраним в draft, так как там есть свободные поля,
+        // или (лучше) просто запомним, что следующий шаг - телефон, а имя пока некуда класть в текущую модель UserContext.
 
-            SendMessage msg = new SendMessage(context.getChatId().toString(), "Поделитесь номером телефона, используя кнопку ниже:");
-            msg.setReplyMarkup(KeyboardFactory.createRequestContactKeyboard());
-            responseSender.sendMessage(msg);
-        } else if (context.getCurrentState() == BotState.WAITING_PHONE) {
-            if (update.getMessage().hasContact()) {
-                String phone = update.getMessage().getContact().getPhoneNumber();
-                // Нормализация номера (добавить + если нет)
-                if (!phone.startsWith("+")) phone = "+" + phone;
+        // ДАВАЙ ДОБАВИМ В UserContext поле tempRegistrationName (см. примечание ниже кода).
+        // Предположим, мы его добавили.
+        context.setTempRegistrationData(fullName);
 
-                context.getDraft().setClientPhoneNumber(phone);
-                completeRegistration(context);
-            } else {
-                responseSender.sendMessage(context.getChatId(), "Пожалуйста, используйте кнопку для отправки контакта.");
-            }
-        }
+        context.setState(BotState.WAITING_PHONE);
+        userContextService.saveUserContext(context);
+
+        responseSender.sendMessage(context.getChatId(),
+                "Приятно познакомиться, " + fullName + "! Теперь отправьте ваш номер телефона для завершения регистрации.",
+                KeyboardFactory.getRegistrationKeyboard());
     }
 
-    private void checkRegistration(Update update, UserContext context) {
-        Long telegramId = update.getMessage().getFrom().getId();
-        var clientOpt = clientService.getClientByTelegramId(telegramId);
+    private void handlePhoneInput(Update update, UserContext context) {
+        String phoneNumber;
 
-        if (clientOpt.isPresent()) {
-            context.setClientId(clientOpt.get().getId());
-            context.setCurrentState(BotState.MAIN_MENU);
-            sendMainMenu(context.getChatId(), "С возвращением, " + clientOpt.get().getFirstName() + "!");
+        if (update.getMessage().hasContact()) {
+            phoneNumber = update.getMessage().getContact().getPhoneNumber();
+        } else if (update.getMessage().hasText()) {
+            // Если пользователь ввел руками
+            phoneNumber = update.getMessage().getText();
         } else {
-            context.setCurrentState(BotState.WAITING_NAME);
-            responseSender.sendMessage(context.getChatId(), "Добро пожаловать! Давайте зарегистрируемся.\nВведите ваше имя:");
+            responseSender.sendMessage(context.getChatId(), "Пожалуйста, нажмите кнопку 'Поделиться контактом' или введите номер.");
+            return;
         }
-    }
 
-    private void completeRegistration(UserContext context) {
-        ClientRegistrationRequest req = new ClientRegistrationRequest();
-        req.setTelegramId(context.getChatId()); // В Telegram ID чата и юзера совпадают для ЛС
-        req.setFirstName(context.getDraft().getClientFirstName());
-        req.setLastName(context.getDraft().getClientLastName());
-        req.setPhoneNumber(context.getDraft().getClientPhoneNumber());
+        // Парсинг имени из сохраненного ранее
+        String fullName = context.getTempRegistrationData();
+        String firstName = fullName.split(" ")[0];
+        String lastName = fullName.contains(" ") ? fullName.substring(fullName.indexOf(" ") + 1) : "Пользователь";
+
+        // Формируем запрос в Client Service
+        ClientRegistrationRequest request = new ClientRegistrationRequest();
+        request.setTelegramId(context.getTelegramId());
+        request.setTelegramUsername(update.getMessage().getChat().getUserName());
+        request.setFirstName(firstName);
+        request.setLastName(lastName);
+        request.setPhoneNumber(phoneNumber);
 
         try {
-            var client = clientService.registerClient(req);
-            context.setClientId(client.getId());
-            context.setCurrentState(BotState.MAIN_MENU);
-            sendMainMenu(context.getChatId(), "Регистрация успешна! Выберите действие в меню.");
-        } catch (Exception e) {
-            responseSender.sendMessage(context.getChatId(), "Ошибка регистрации: " + e.getMessage());
-            context.setCurrentState(BotState.START);
-        }
-    }
+            ClientResponse response = clientServiceClient.registerClient(request);
 
-    private void sendMainMenu(Long chatId, String text) {
-        SendMessage msg = new SendMessage(chatId.toString(), text);
-        msg.setReplyMarkup(KeyboardFactory.createMainMenuKeyboard());
-        responseSender.sendMessage(msg);
+            context.setState(BotState.MAIN_MENU);
+            context.setTempRegistrationData(null); // Чистим временные данные
+            userContextService.saveUserContext(context);
+
+            responseSender.sendMessage(context.getChatId(),
+                    "Регистрация успешна! Добро пожаловать, " + response.getFirstName() + ".",
+                    KeyboardFactory.getMainMenuKeyboard());
+
+        } catch (Exception e) {
+            responseSender.sendMessage(context.getChatId(), "Ошибка регистрации: " + e.getMessage() + ". Попробуйте еще раз.");
+        }
     }
 }

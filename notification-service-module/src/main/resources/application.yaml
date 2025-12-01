@@ -3,12 +3,13 @@ server:
 spring:
   main:
     banner-mode: off
-#  autoconfigure:
-#      exclude:
-#        - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-#        - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-#        - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
-#        - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
+    allow-circular-references: true
+  autoconfigure:
+      exclude:
+        - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+        - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+        - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+        - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
   application:
     name: &applicationName notification-service
 
