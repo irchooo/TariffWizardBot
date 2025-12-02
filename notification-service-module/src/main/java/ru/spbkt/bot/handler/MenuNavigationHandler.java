@@ -17,6 +17,7 @@ public class MenuNavigationHandler implements InputHandler {
 
     private final ResponseSender responseSender;
     private final TariffServiceClient tariffServiceClient;
+    private final ProfileHandler profileHandler;
 
     // Карта для сопоставления текста кнопки с новым BotState
     private static final Map<String, BotState> COMMAND_TO_STATE = Map.of(
@@ -76,9 +77,9 @@ public class MenuNavigationHandler implements InputHandler {
                 break;
 
             case PROFILE_VIEW:
-                // Сценарий 5: Профиль. Делегируется ProfileHandler.
-                responseSender.sendMessage(context.getChatId(),
-                        "Переход в профиль..."); // Фактическое отображение будет в ProfileHandler
+                // СЦЕНАРИЙ 5: Профиль. ВМЕСТО отправки сообщения, ДЕЛЕГИРУЕМ
+                profileHandler.showProfile(context, null); // <--- ПРАВИЛЬНЫЙ ВЫЗОВ
+                // ProfileHandler сам установит состояние на PROFILE_VIEW и отправит сообщение с данными.
                 break;
 
             case APPLICATIONS_LIST:

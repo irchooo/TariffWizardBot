@@ -21,8 +21,8 @@ public enum BotState {
 
     // Профиль (Сценарий 5)
     PROFILE_VIEW,           // Просмотр профиля
-    PROFILE_EDIT_NAME,      // Изменение имени
-    PROFILE_EDIT_LAST_NAME, // Изменение фамилии
+    WAITING_FIRST_NAME,     // Ожидание ввода нового имени
+    WAITING_LAST_NAME,      // Ожидание ввода новой фамилии
 
     // Заявки (Сценарий 6)
     APPLICATIONS_LIST,      // Просмотр списка заявок

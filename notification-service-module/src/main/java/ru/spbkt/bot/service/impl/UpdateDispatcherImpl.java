@@ -9,6 +9,7 @@ import ru.spbkt.bot.model.BotState;
 import ru.spbkt.bot.model.UserContext;
 import ru.spbkt.bot.service.ResponseSender;
 import ru.spbkt.bot.service.UpdateDispatcher;
+import ru.spbkt.bot.service.UserContextService;
 import ru.spbkt.bot.util.KeyboardFactory;
 
 import java.util.HashMap;
@@ -34,23 +35,39 @@ public class UpdateDispatcherImpl implements UpdateDispatcher {
 
         Map<BotState, InputHandler> handlerMap = new HashMap<>();
 
-        // 2. Находим RegistrationHandler и маппим его на оба состояния
+        // 1. Стандартный маппинг по getHandlerName() для большинства хендлеров
+        handlerList.forEach(handler -> handlerMap.put(handler.getHandlerName(), handler));
+
+        // 2. Явный маппинг для RegistrationHandler (Сценарий 1)
         InputHandler registrationHandler = handlerList.stream()
                 .filter(h -> h.getClass().getSimpleName().equals("RegistrationHandler"))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("RegistrationHandler not found in context."));
+                .orElseThrow(() -> new IllegalStateException("RegistrationHandler not found."));
 
         handlerMap.put(BotState.WAITING_NAME, registrationHandler);
         handlerMap.put(BotState.WAITING_PHONE, registrationHandler);
+        // Примечание: MAIN_MENU и START маппятся автоматически через MenuNavigationHandler и StartHandler
 
-        // 3. Маппим остальные хендлеры (пока их нет, но для MenuNavigationHandler будет BotState.MAIN_MENU)
-        handlerList.stream()
-                .filter(h -> !h.getClass().getSimpleName().equals("RegistrationHandler"))
-                .forEach(h -> handlerMap.put(h.getHandlerName(), h));
+
+        // 3. КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Явный маппинг для ProfileHandler (Сценарий 5)
+        InputHandler profileHandler = handlerList.stream()
+                .filter(h -> h.getClass().getSimpleName().equals("ProfileHandler"))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("ProfileHandler not found."));
+
+        // ProfileHandler управляет тремя состояниями:
+        // PROFILE_VIEW (начальное, маппится через getHandlerName())
+        handlerMap.put(BotState.WAITING_FIRST_NAME, profileHandler); // <--- ДОБАВЛЕНО
+        handlerMap.put(BotState.WAITING_LAST_NAME, profileHandler);  // <--- ДОБАВЛЕНО
+
+        // 4. ДОБАВИТЬ: Аналогичный маппинг для TariffConstructorHandler (Сценарий 2)
+        // (Если вы его уже реализовали с WAITING_GB_INPUT и т.д.)
+        // InputHandler constructorHandler = handlerList.stream() ...
+        // handlerMap.put(BotState.WAITING_GB_INPUT, constructorHandler);
+        // ... и т.д.
 
         this.handlers = handlerMap;
     }
-
     @Override
     public void dispatch(Update update, UserContext context) {
         if (!update.hasMessage()) return;
