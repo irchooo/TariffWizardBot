@@ -17,7 +17,7 @@ public enum BotState {
 
     // Каталог тарифов (Сценарий 3)
     CATALOG_VIEW,           // Просмотр списка готовых тарифов
-    CATALOG_SELECTED,       // Выбран конкретный готовый тариф (перед отправкой заявки)
+    WAITING_TARIFF_CONFIRMATION,
 
     // Профиль (Сценарий 5)
     PROFILE_VIEW,           // Просмотр профиля

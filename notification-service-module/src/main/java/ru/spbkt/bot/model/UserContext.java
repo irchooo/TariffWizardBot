@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Контекст пользователя: хранит его текущее состояние и черновики данных.
@@ -30,6 +32,8 @@ public class UserContext implements Serializable {
      * Добавлено согласно логике RegistrationHandler.
      */
     private String tempRegistrationData;
+
+    private Map<String, Object> tempData = new HashMap<>();
 
     public UserContext(Long telegramId, Long chatId) {
         this.telegramId = telegramId;

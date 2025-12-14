@@ -37,4 +37,6 @@ public interface TariffServiceClient {
      * @return Детализация расчета и итоговая стоимость[cite: 1158].
      */
     TariffCalculationResponse calculateFixed(Integer tariffId);
+    // <-- ДОБАВИТЬ ЭТОТ МЕТОД
+
 }
